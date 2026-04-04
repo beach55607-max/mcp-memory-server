@@ -1,0 +1,27 @@
+# Copy this file to wrangler.toml and fill in your own values
+# DO NOT commit wrangler.toml — it contains your personal Cloudflare resource IDs
+
+name = "mcp-memory-server"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+[ai]
+binding = "AI"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "memory-db"
+database_id = "<YOUR_D1_DATABASE_ID>"     # wrangler d1 create memory-db
+
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "memory-index"               # wrangler vectorize create memory-index --dimensions=1024 --metric=cosine
+
+[[kv_namespaces]]
+binding = "OAUTH_KV"
+id = "<YOUR_KV_NAMESPACE_ID>"             # wrangler kv namespace create OAUTH_KV
+
+[vars]
+MCP_ENABLED = "true"
+WRITE_ENABLED = "true"

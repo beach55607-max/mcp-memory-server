@@ -1,0 +1,57 @@
+{
+  "description": "Example gold set for embedding quality validation. Replace with your own domain-specific queries and knowledge files.",
+  "version": "1.0",
+  "queries": [
+    {
+      "id": "K01", "type": "knowledge",
+      "query": "How does the authentication flow work",
+      "expected_file": "eng-auth-flow.md",
+      "expected_title": "Authentication flow"
+    },
+    {
+      "id": "K02", "type": "knowledge",
+      "query": "Database migration steps",
+      "expected_file": "eng-db-migration.md",
+      "expected_title": "Database migration procedure"
+    },
+    {
+      "id": "K03", "type": "knowledge",
+      "query": "API rate limiting configuration",
+      "expected_file": "eng-rate-limiting.md",
+      "expected_title": "Rate limiting setup"
+    },
+    {
+      "id": "K04", "type": "knowledge",
+      "query": "How to set up the development environment",
+      "expected_file": "eng-dev-setup.md",
+      "expected_title": "Development environment setup"
+    },
+    {
+      "id": "K05", "type": "knowledge",
+      "query": "Deployment pipeline stages",
+      "expected_file": "eng-deploy-pipeline.md",
+      "expected_title": "CI/CD pipeline"
+    },
+    {
+      "id": "N01", "type": "negative",
+      "query": "What is the weather like today",
+      "expected_file": null,
+      "expected_title": null,
+      "note": "Unrelated query — top-3 score should be < 0.5"
+    },
+    {
+      "id": "N02", "type": "negative",
+      "query": "Best restaurants in Tokyo",
+      "expected_file": null,
+      "expected_title": null,
+      "note": "Unrelated query — top-3 score should be < 0.5"
+    },
+    {
+      "id": "N03", "type": "negative",
+      "query": "How to train a puppy",
+      "expected_file": null,
+      "expected_title": null,
+      "note": "Unrelated query — top-3 score should be < 0.5"
+    }
+  ]
+}

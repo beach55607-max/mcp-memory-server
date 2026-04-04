@@ -1,0 +1,33 @@
+{
+  "name": "mcp-memory-server",
+  "version": "1.0.0",
+  "description": "MCP Memory Server — semantic memory for AI coding agents, powered by Cloudflare Workers + D1 + Vectorize",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute memory-db --file=migrations/0001_init.sql",
+    "db:init:local": "wrangler d1 execute memory-db --local --file=migrations/0001_init.sql",
+    "eval": "node scripts/eval-embedding.mjs"
+  },
+  "keywords": [
+    "mcp",
+    "memory",
+    "semantic-search",
+    "cloudflare-workers",
+    "vectorize",
+    "d1",
+    "ai-agents",
+    "claude",
+    "chatgpt",
+    "gemini"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "agents": "^0.9.0",
+    "zod": "^4.3.6"
+  }
+}
