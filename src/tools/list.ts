@@ -25,7 +25,7 @@ export async function handleList(env: Env, input: Record<string, any>): Promise<
         offset: input.offset || 0,
       },
     };
-  } catch (err: any) {
-    return { result: { error: 'LIST_FAILED', message: err.message }, isError: true };
+  } catch {
+    return { result: { error: 'LIST_FAILED', message: 'Failed to list memories' }, isError: true };
   }
 }

@@ -279,6 +279,17 @@ For testing or integrations that don't use MCP:
 | `MCP_ENABLED` | `"true"` | Kill switch — set to `"false"` to disable the entire server |
 | `WRITE_ENABLED` | `"true"` | Write kill switch — set to `"false"` to make the server read-only |
 
+## Security
+
+This server has **no built-in authentication**. Anyone who knows your Worker URL can read, write, and delete memories via the REST API.
+
+For a personal knowledge base this is usually acceptable. For shared or sensitive use cases:
+
+- **Recommended:** Put [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/applications/configure-apps/) in front of your Worker to require login
+- **Alternative:** Add a Bearer token check in the `fetch` handler
+- **CORS:** The server returns `Access-Control-Allow-Origin: *` by default. If you need to restrict which websites can call your API, modify the CORS headers in `src/index.ts`
+- **Kill switch:** Set `WRITE_ENABLED = "false"` in `wrangler.toml` to make the server read-only
+
 ## Cost
 
 On Cloudflare Workers Free plan:

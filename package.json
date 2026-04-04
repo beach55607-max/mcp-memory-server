@@ -22,12 +22,17 @@
     "chatgpt",
     "gemini"
   ],
-  "author": "",
+  "author": "beach55607-max",
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "agents": "^0.9.0",
     "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250401.0",
+    "typescript": "^5.8.0",
+    "wrangler": "^4.0.0"
   }
 }

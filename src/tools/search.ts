@@ -67,7 +67,7 @@ export async function handleSearch(env: Env, input: Record<string, any>): Promis
       .filter(Boolean);
 
     return { result: { results } };
-  } catch (err: any) {
-    return { result: { error: 'SEARCH_FAILED', message: err.message }, isError: true };
+  } catch {
+    return { result: { error: 'SEARCH_FAILED', message: 'Failed to search memories' }, isError: true };
   }
 }

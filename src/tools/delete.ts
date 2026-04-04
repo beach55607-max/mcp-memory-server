@@ -17,6 +17,11 @@ export async function handleDelete(env: Env, input: Record<string, any>): Promis
 
   const id = input.id as string;
 
+  // Validate ID format (SHA-256 hex)
+  if (!/^[0-9a-f]{64}$/.test(id)) {
+    return { result: { error: 'VALIDATION_ERROR', message: 'id must be a 64-character hex string' }, isError: true };
+  }
+
   // Check exists
   const entry = await getEntry(env.DB, id);
   if (!entry) {

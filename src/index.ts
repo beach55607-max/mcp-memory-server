@@ -19,9 +19,7 @@ export interface Env {
   WRITE_ENABLED: string;
 }
 
-let _env: Env;
-
-function createServer(): McpServer {
+function createServer(env: Env): McpServer {
   const server = new McpServer({ name: 'mcp-memory-server', version: '1.0.0' });
 
   server.tool(
@@ -37,8 +35,7 @@ function createServer(): McpServer {
       session_id: { type: 'string', description: 'Optional session UUID' },
     },
     async (params: any) => {
-      const input = { ...params, tags: params.tags ? JSON.parse(params.tags) : undefined };
-      const { result, isError } = await handleSave(_env, input);
+      const { result, isError } = await handleSave(env, params);
       return { content: [{ type: 'text' as const, text: JSON.stringify(result) }], isError };
     },
   );
@@ -53,7 +50,7 @@ function createServer(): McpServer {
       repo: { type: 'string', description: 'Optional filter by repo' },
     },
     async (params: any) => {
-      const { result, isError } = await handleSearch(_env, params);
+      const { result, isError } = await handleSearch(env, params);
       return { content: [{ type: 'text' as const, text: JSON.stringify(result) }], isError };
     },
   );
@@ -63,7 +60,7 @@ function createServer(): McpServer {
     'Delete a memory entry by ID',
     { id: { type: 'string', description: 'Memory entry ID' } },
     async (params: any) => {
-      const { result, isError } = await handleDelete(_env, params);
+      const { result, isError } = await handleDelete(env, params);
       return { content: [{ type: 'text' as const, text: JSON.stringify(result) }], isError };
     },
   );
@@ -78,7 +75,7 @@ function createServer(): McpServer {
       offset: { type: 'number', description: 'Pagination offset' },
     },
     async (params: any) => {
-      const { result, isError } = await handleList(_env, params);
+      const { result, isError } = await handleList(env, params);
       return { content: [{ type: 'text' as const, text: JSON.stringify(result) }], isError };
     },
   );
@@ -89,7 +86,6 @@ function createServer(): McpServer {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
-    _env = env;
 
     // CORS
     if (request.method === 'OPTIONS') {
@@ -114,7 +110,7 @@ export default {
 
     // MCP Streamable HTTP endpoint (for Claude Code / Claude.ai / ChatGPT / Cursor etc.)
     if (url.pathname === '/mcp' || url.pathname.startsWith('/mcp/')) {
-      const server = createServer();
+      const server = createServer(env);
       const handler = createMcpHandler(server, {
         sessionIdGenerator: () => crypto.randomUUID(),
         enableJsonResponse: true,
@@ -133,8 +129,8 @@ export default {
           return json(r.result, r.isError ? 404 : 200);
         }
         if (url.pathname === '/api/list') return json((await handleList(env, body)).result);
-      } catch (e: any) {
-        return json({ error: 'INTERNAL', message: e.message }, 500);
+      } catch {
+        return json({ error: 'INTERNAL', message: 'Request processing failed' }, 500);
       }
     }
 

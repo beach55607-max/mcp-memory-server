@@ -51,7 +51,7 @@ export async function handleSave(env: Env, input: Record<string, any>): Promise<
     const id = await generateId(type, title, content, repo, sessionId);
     const now = new Date().toISOString();
 
-    // Embedding
+    // Embedding (title + first 500 chars — trade-off: cost vs full-content fidelity)
     const embeddingText = `${title}\n${content.substring(0, 500)}`;
     const embedding = await getEmbedding(env.AI, embeddingText);
 
@@ -67,7 +67,7 @@ export async function handleSave(env: Env, input: Record<string, any>): Promise<
     await upsertVector(env.VECTORIZE, id, embedding, metadata);
 
     return { result: { id, status: 'saved' } };
-  } catch (err: any) {
-    return { result: { error: 'SAVE_FAILED', message: err.message }, isError: true };
+  } catch {
+    return { result: { error: 'SAVE_FAILED', message: 'Failed to save memory entry' }, isError: true };
   }
 }

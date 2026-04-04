@@ -18,8 +18,13 @@ export interface MemoryEntry {
 
 export async function upsertEntry(db: D1Database, entry: MemoryEntry): Promise<void> {
   await db.prepare(
-    `INSERT OR REPLACE INTO memory_entries (id, type, title, content, tags, repo, source, batch_id, created_at, updated_at, session_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO memory_entries (id, type, title, content, tags, repo, source, batch_id, created_at, updated_at, session_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET
+       type = excluded.type, title = excluded.title, content = excluded.content,
+       tags = excluded.tags, repo = excluded.repo, source = excluded.source,
+       batch_id = excluded.batch_id, updated_at = excluded.updated_at,
+       session_id = excluded.session_id`
   ).bind(
     entry.id, entry.type, entry.title, entry.content,
     entry.tags, entry.repo, entry.source, entry.batch_id,
