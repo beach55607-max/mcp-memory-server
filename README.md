@@ -1,100 +1,100 @@
 # MCP Memory Server
 
-A semantic memory server for AI coding agents. Store knowledge, search by meaning, and let your AI assistant remember across sessions.
+給 AI coding agent 用的語意記憶伺服器。儲存知識、用自然語言搜尋、讓 AI 助理跨 session 記住你的 context。
 
-Built on **Cloudflare Workers** + **D1** (SQLite) + **Vectorize** (vector search) + **Workers AI** (bge-m3 embeddings).
+基於 **Cloudflare Workers** + **D1**（SQLite）+ **Vectorize**（向量搜尋）+ **Workers AI**（bge-m3 embedding）。
 
-Supports any MCP-compatible client: Claude Code, Claude.ai, ChatGPT, Gemini CLI, Cursor, VS Code + Copilot, Windsurf, and more.
+支援所有 MCP 相容客戶端：Claude Code、Claude.ai、ChatGPT、Gemini CLI、Cursor、VS Code + Copilot、Windsurf 等。
 
-## What It Does
+## 功能
 
-Your AI coding agent can:
+你的 AI coding agent 可以：
 
-- **`memory_save`** — Save a memory with title, content, type, tags, and optional repo/session metadata
-- **`memory_search`** — Semantic search: find relevant memories using natural language, not keywords
-- **`memory_list`** — List and filter memories by type or repo
-- **`memory_delete`** — Delete a memory by ID
+- **`memory_save`** — 儲存一筆記憶（含標題、內容、類型、標籤、repo / session 等 metadata）
+- **`memory_search`** — 語意搜尋：用自然語言找到相關記憶，不是關鍵字比對
+- **`memory_list`** — 列出並篩選記憶（依類型或 repo）
+- **`memory_delete`** — 依 ID 刪除記憶
 
-Memories are embedded with [bge-m3](https://huggingface.co/BAAI/bge-m3) (multilingual, 1024 dimensions) and stored in Cloudflare Vectorize for fast semantic retrieval.
+記憶會用 [bge-m3](https://huggingface.co/BAAI/bge-m3)（多語言、1024 維）做 embedding，存入 Cloudflare Vectorize 做快速語意檢索。
 
-### Memory Types
+### 記憶類型
 
-| Type | Use Case |
-|------|----------|
-| `knowledge` | Architecture decisions, gotchas, domain knowledge |
-| `session` | Session summaries, what was done and why |
-| `feedback` | User preferences, workflow corrections |
-| `project` | Ongoing initiatives, deadlines, stakeholder context |
+| 類型 | 用途 |
+|------|------|
+| `knowledge` | 架構決策、踩坑教訓、領域知識 |
+| `session` | Session 摘要、做了什麼、為什麼 |
+| `feedback` | 使用者偏好、工作流程修正 |
+| `project` | 進行中的專案、截止日、利害關係人 context |
 
-## Deploy
+## 部署
 
-### Prerequisites
+### 前置條件
 
-- [Cloudflare account](https://dash.cloudflare.com/sign-up) (Workers Free plan works)
+- [Cloudflare 帳號](https://dash.cloudflare.com/sign-up)（Workers Free 方案即可）
 - [Node.js](https://nodejs.org/) 18+
-- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/): `npm install -g wrangler`
+- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)：`npm install -g wrangler`
 
-### Steps
+### 步驟
 
 ```bash
 # 1. Clone
-git clone https://github.com/YOUR_USERNAME/mcp-memory-server.git
+git clone https://github.com/beach55607-max/mcp-memory-server.git
 cd mcp-memory-server
 
-# 2. Install dependencies
+# 2. 安裝依賴
 npm install
 
-# 3. Create Cloudflare resources
+# 3. 建立 Cloudflare 資源
 wrangler d1 create memory-db
 wrangler vectorize create memory-index --dimensions=1024 --metric=cosine
 wrangler kv namespace create OAUTH_KV
 
-# 4. Configure
+# 4. 設定
 cp wrangler.toml.example wrangler.toml
-# Edit wrangler.toml — fill in the IDs from step 3
+# 編輯 wrangler.toml — 填入步驟 3 產生的 ID
 
-# 5. Initialize database
+# 5. 初始化資料庫
 npm run db:init
 
-# 6. Deploy
+# 6. 部署
 npm run deploy
 ```
 
-Your server is now live at `https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev`.
+部署完成後，你的 server 會在 `https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev`。
 
-### Verify
+### 驗證
 
 ```bash
 curl https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/health
 # {"status":"ok","version":"1.0.0","mcp_enabled":true,"write_enabled":true}
 ```
 
-## Connect Your AI Client
+## 連接你的 AI 客戶端
 
-### Claude.ai (Web + Mobile)
+### Claude.ai（Web + 手機）
 
-> **Important:** Set up on the **web version** first. Once configured, it automatically works on the iOS / Android app.
+> **重要：** 必須先在**網頁版**設定。設定完成後，iOS / Android app 自動可用。
 
-1. Go to [claude.ai](https://claude.ai) → **Settings** → **Integrations**
-2. Add a new **remote MCP server**
-3. Enter your server URL: `https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp`
-4. Open Claude on your phone — the memory tools are now available
+1. 到 [claude.ai](https://claude.ai) → **Settings** → **Integrations**
+2. 新增一個 **remote MCP server**
+3. 輸入你的 server URL：`https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp`
+4. 打開手機上的 Claude — memory tools 已可使用
 
-### ChatGPT (Web + Mobile)
+### ChatGPT（Web + 手機）
 
-> **Important:** Enable **Developer Mode** on the **web version** first. Once configured, it works on the mobile app.
+> **重要：** 必須先在**網頁版**開啟 **Developer Mode** 並新增 MCP server。設定完成後，手機 app 自動可用。
 
-1. Go to [chatgpt.com](https://chatgpt.com) → **Settings** → **Connectors** → **Advanced**
-2. Toggle on **Developer Mode**
-3. Go to **Connectors** tab → Add a new MCP server
-4. Enter your server URL: `https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp`
-5. Open ChatGPT on your phone — the memory tools are now available
+1. 到 [chatgpt.com](https://chatgpt.com) → **Settings** → **Connectors** → **Advanced**
+2. 開啟 **Developer Mode**
+3. 到 **Connectors** 分頁 → 新增 MCP server
+4. 輸入你的 server URL：`https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp`
+5. 打開手機上的 ChatGPT — memory tools 已可使用
 
-Requires Pro, Plus, Business, Enterprise, or Education plan.
+需要 Pro、Plus、Business、Enterprise 或 Education 方案。
 
-### Claude Code (CLI)
+### Claude Code（CLI）
 
-Add to your Claude Code settings (`~/.claude.json` or project `.claude/settings.json`):
+在 Claude Code 設定檔（`~/.claude.json` 或專案 `.claude/settings.json`）加入：
 
 ```json
 {
@@ -107,7 +107,7 @@ Add to your Claude Code settings (`~/.claude.json` or project `.claude/settings.
 }
 ```
 
-Or use the stdio proxy for local development:
+或用 stdio proxy 做本地開發：
 
 ```json
 {
@@ -125,7 +125,7 @@ Or use the stdio proxy for local development:
 
 ### Gemini CLI
 
-Add to `~/.gemini/settings.json`:
+在 `~/.gemini/settings.json` 加入：
 
 ```json
 {
@@ -137,16 +137,16 @@ Add to `~/.gemini/settings.json`:
 }
 ```
 
-Gemini CLI supports stdio, SSE, and Streamable HTTP transports, plus OAuth 2.0 for remote servers.
+Gemini CLI 支援 stdio、SSE、Streamable HTTP 三種傳輸協定，加上 OAuth 2.0 做遠端認證。
 
 ### Cursor
 
-1. Open **Cursor Settings** → **MCP**
-2. Add a new server:
-   - **Transport**: `streamable-http`
-   - **URL**: `https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp`
+1. 開啟 **Cursor Settings** → **MCP**
+2. 新增 server：
+   - **Transport**：`streamable-http`
+   - **URL**：`https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp`
 
-Or add to `.cursor/mcp.json`:
+或在 `.cursor/mcp.json` 加入：
 
 ```json
 {
@@ -161,7 +161,7 @@ Or add to `.cursor/mcp.json`:
 
 ### VS Code + GitHub Copilot
 
-Add to `.vscode/mcp.json`:
+在 `.vscode/mcp.json` 加入：
 
 ```json
 {
@@ -174,38 +174,38 @@ Add to `.vscode/mcp.json`:
 }
 ```
 
-Requires VS Code 1.99+ with GitHub Copilot extension.
+需要 VS Code 1.99+ 搭配 GitHub Copilot extension。
 
 ### Windsurf
 
-1. Open **Windsurf Settings** → **MCP**
-2. Add your server URL: `https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp`
+1. 開啟 **Windsurf Settings** → **MCP**
+2. 加入你的 server URL：`https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp`
 
-### JetBrains IDEs (IntelliJ, WebStorm, PyCharm, etc.)
+### JetBrains IDEs（IntelliJ、WebStorm、PyCharm 等）
 
-**Settings** → **Tools** → **MCP Server** → Add your server URL.
+**Settings** → **Tools** → **MCP Server** → 加入你的 server URL。
 
-Works via GitHub Copilot plugin or Windsurf plugin for JetBrains.
+透過 GitHub Copilot plugin 或 Windsurf plugin for JetBrains 使用。
 
-### Other Clients
+### 其他客戶端
 
-Any MCP-compatible client that supports **Streamable HTTP** transport can connect to:
+任何支援 **Streamable HTTP** 的 MCP 客戶端都可以連接：
 
 ```
 https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp
 ```
 
-Clients that only support **stdio** can use the included proxy:
+只支援 **stdio** 的客戶端可以用附帶的 proxy：
 
 ```bash
 MCP_MEMORY_API=https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev \
   node src/mcp-stdio-proxy.mjs
 ```
 
-## Architecture
+## 架構
 
 ```
-Client (Claude / ChatGPT / Cursor / ...)
+客戶端（Claude / ChatGPT / Cursor / ...）
   │
   ├── MCP Streamable HTTP ──→ /mcp endpoint
   │                              │
@@ -219,26 +219,26 @@ Client (Claude / ChatGPT / Cursor / ...)
                     │            │            │
                 ┌───┴───┐  ┌────┴────┐  ┌────┴────┐
                 │  D1   │  │Vectorize│  │ KV      │
-                │(SQLite)│  │(vectors)│  │(OAuth)  │
+                │(SQLite)│  │(向量)   │  │(OAuth)  │
                 └───────┘  └─────────┘  └─────────┘
 ```
 
-### How Semantic Search Works
+### 語意搜尋原理
 
-1. When you **save** a memory, the title + first 500 chars of content are embedded into a 1024-dimension vector using bge-m3
-2. The full content is stored in D1 (SQLite); the vector is stored in Vectorize
-3. When you **search**, your query is embedded with the same model, and Vectorize returns the nearest vectors
-4. Full content is fetched from D1 and returned with similarity scores
+1. **儲存**時，標題 + 內容前 500 字會被 bge-m3 轉為 1024 維向量
+2. 完整內容存入 D1（SQLite），向量存入 Vectorize
+3. **搜尋**時，你的 query 用同一個模型做 embedding，Vectorize 回傳最近的向量
+4. 從 D1 取出完整內容，附上相似度分數回傳
 
-### Deterministic IDs
+### 確定性 ID
 
-Each memory gets a SHA-256 ID based on `type + title + content + repo + session_id`. Saving the same memory twice updates it instead of creating a duplicate (upsert).
+每筆記憶的 ID = SHA-256(`type + title + content + repo + session_id`)。同一筆記憶儲存兩次會更新而非建立副本（upsert），且 `created_at` 保留原始值。
 
-## Scripts
+## 工具腳本
 
-### Batch Import
+### 批次匯入
 
-Import knowledge files (markdown with frontmatter) into the server:
+把知識檔（含 frontmatter 的 markdown）匯入 server：
 
 ```bash
 MCP_MEMORY_API=https://your-worker.workers.dev \
@@ -246,9 +246,9 @@ KNOWLEDGE_DIR=~/.claude/knowledge \
   node scripts/batch-import.mjs
 ```
 
-### Embedding Evaluation
+### Embedding 品質驗證
 
-Test search quality against a gold set:
+用 gold set 測試搜尋品質：
 
 ```bash
 CLOUDFLARE_ACCOUNT_ID=xxx \
@@ -256,11 +256,11 @@ CLOUDFLARE_API_TOKEN=xxx \
   node scripts/eval-embedding.mjs
 ```
 
-Edit `tests/gold-set.json` to add your own domain-specific test queries.
+編輯 `tests/gold-set.json` 加入你自己的領域測試查詢。
 
 ## REST API
 
-For testing or integrations that don't use MCP:
+給不使用 MCP 的測試或整合用：
 
 | Method | Endpoint | Body |
 |--------|----------|------|
@@ -270,38 +270,126 @@ For testing or integrations that don't use MCP:
 | POST | `/api/list` | `{ type?, repo?, limit?, offset? }` |
 | GET | `/health` | — |
 
-## Configuration
+## 設定
 
-### Environment Variables (wrangler.toml)
+### 環境變數（wrangler.toml）
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `MCP_ENABLED` | `"true"` | Kill switch — set to `"false"` to disable the entire server |
-| `WRITE_ENABLED` | `"true"` | Write kill switch — set to `"false"` to make the server read-only |
+| 變數 | 預設值 | 說明 |
+|------|--------|------|
+| `MCP_ENABLED` | `"true"` | 總開關 — 設為 `"false"` 停用整個 server |
+| `WRITE_ENABLED` | `"true"` | 寫入開關 — 設為 `"false"` 讓 server 變成唯讀 |
 
-## Security
+## 安全性
 
-This server has **no built-in authentication**. Anyone who knows your Worker URL can read, write, and delete memories via the REST API.
+此 server **沒有內建認證**。任何知道你 Worker URL 的人都可以透過 REST API 讀寫刪除記憶。
 
-For a personal knowledge base this is usually acceptable. For shared or sensitive use cases:
+個人知識庫通常可以接受。如果需要更嚴格的存取控制：
 
-- **Recommended:** Put [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/applications/configure-apps/) in front of your Worker to require login
-- **Alternative:** Add a Bearer token check in the `fetch` handler
-- **CORS:** The server returns `Access-Control-Allow-Origin: *` by default. If you need to restrict which websites can call your API, modify the CORS headers in `src/index.ts`
-- **Kill switch:** Set `WRITE_ENABLED = "false"` in `wrangler.toml` to make the server read-only
+- **建議：** 在 Worker 前面加 [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/applications/configure-apps/) 要求登入
+- **替代方案：** 在 `fetch` handler 裡加 Bearer token 驗證
+- **CORS：** Server 預設回傳 `Access-Control-Allow-Origin: *`。如需限制哪些網站可以呼叫你的 API，修改 `src/index.ts` 的 CORS headers
+- **緊急開關：** 在 `wrangler.toml` 設定 `WRITE_ENABLED = "false"` 讓 server 變成唯讀
 
-## Cost
+## 費用
 
-On Cloudflare Workers Free plan:
+Cloudflare Workers Free 方案：
 
-| Resource | Free Tier |
-|----------|-----------|
-| Workers | 100K requests/day |
-| D1 | 5M rows read, 100K rows written/day |
-| Vectorize | 30M queried dimensions, 10M stored dimensions/month |
-| Workers AI | 10K neurons/day (bge-m3) |
+| 資源 | 免費額度 |
+|------|---------|
+| Workers | 100K requests/天 |
+| D1 | 5M rows 讀取、100K rows 寫入/天 |
+| Vectorize | 30M queried dimensions、10M stored dimensions/月 |
+| Workers AI | 10K neurons/天（bge-m3） |
 
-For a personal knowledge base, the free tier is more than enough.
+個人知識庫，免費額度綽綽有餘。
+
+## 相關專案
+
+如果你還需要 **AI 工程治理 skill**（boundary-first、spec planning、adversarial review），看 [ai-dev-toolkit](https://github.com/beach55607-max/ai-dev-toolkit)。
+
+---
+
+## English Summary
+
+> Architecture diagrams, code blocks, and config examples are language-neutral — refer to the Chinese section above.
+
+### What Is This
+
+A semantic memory server for AI coding agents. Store knowledge, search by meaning, and let your AI assistant remember across sessions.
+
+Built on **Cloudflare Workers** + **D1** (SQLite) + **Vectorize** (vector search) + **Workers AI** (bge-m3 embeddings).
+
+### Tools
+
+- **`memory_save`** — Save a memory with title, content, type, tags, and optional repo/session metadata
+- **`memory_search`** — Semantic search: find relevant memories using natural language, not keywords
+- **`memory_list`** — List and filter memories by type or repo
+- **`memory_delete`** — Delete a memory by ID
+
+### Memory Types
+
+| Type | Use Case |
+|------|----------|
+| `knowledge` | Architecture decisions, gotchas, domain knowledge |
+| `session` | Session summaries, what was done and why |
+| `feedback` | User preferences, workflow corrections |
+| `project` | Ongoing initiatives, deadlines, stakeholder context |
+
+### Deploy
+
+```bash
+git clone https://github.com/beach55607-max/mcp-memory-server.git && cd mcp-memory-server
+npm install
+wrangler d1 create memory-db
+wrangler vectorize create memory-index --dimensions=1024 --metric=cosine
+wrangler kv namespace create OAUTH_KV
+cp wrangler.toml.example wrangler.toml  # fill in your IDs
+npm run db:init && npm run deploy
+```
+
+### Connect Your AI Client
+
+| Platform | Setup Location | Mobile |
+|----------|---------------|--------|
+| **Claude.ai** | Web → Settings → Integrations → Add remote MCP server | Auto-syncs to iOS / Android after web setup |
+| **ChatGPT** | Web → Settings → Connectors → Advanced → Enable Developer Mode → Add MCP server | Auto-syncs to mobile after web setup. Requires Pro/Plus/Business/Enterprise/Education |
+| **Claude Code** | `~/.claude.json` → `mcpServers` → `type: "url"` | — |
+| **Gemini CLI** | `~/.gemini/settings.json` → `mcpServers` → `uri` | — |
+| **Cursor** | Settings → MCP → Transport: `streamable-http` | — |
+| **VS Code + Copilot** | `.vscode/mcp.json` → `servers` → `type: "http"` | — |
+| **Windsurf** | Settings → MCP → Add URL | — |
+| **JetBrains** | Settings → Tools → MCP Server | — |
+| **stdio-only clients** | Use the included `src/mcp-stdio-proxy.mjs` | — |
+
+Server URL for all platforms: `https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp`
+
+### How Semantic Search Works
+
+1. On **save**, title + first 500 chars are embedded into a 1024-dim vector (bge-m3)
+2. Full content → D1 (SQLite); vector → Vectorize
+3. On **search**, query is embedded with the same model, Vectorize returns nearest vectors
+4. Full content is fetched from D1 and returned with similarity scores
+
+### Deterministic IDs
+
+Each memory gets a SHA-256 ID from `type + title + content + repo + session_id`. Same memory saved twice = upsert (update, preserving original `created_at`).
+
+### Security
+
+No built-in authentication. Anyone with your Worker URL can read/write/delete.
+
+- **Recommended:** Add [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/applications/configure-apps/) for login
+- **Alternative:** Add Bearer token check in the `fetch` handler
+- **CORS:** Returns `Access-Control-Allow-Origin: *` by default
+- **Kill switch:** Set `WRITE_ENABLED = "false"` for read-only mode
+
+### Cost
+
+Cloudflare Workers Free plan covers a personal knowledge base easily: 100K requests/day, 5M D1 rows read/day, 10K AI neurons/day.
+
+### Related
+
+Need **AI engineering governance skills** (boundary-first, spec planning, adversarial review)? See [ai-dev-toolkit](https://github.com/beach55607-max/ai-dev-toolkit).
 
 ## License
 
