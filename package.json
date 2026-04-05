@@ -1,14 +1,17 @@
 {
   "name": "mcp-memory-server",
-  "version": "1.0.0",
-  "description": "MCP Memory Server — semantic memory for AI coding agents, powered by Cloudflare Workers + D1 + Vectorize",
+  "version": "2.0.0",
+  "description": "MCP Memory Server — semantic memory with governance for AI coding agents. Cloudflare Workers + D1 + Vectorize + Workers AI.",
   "main": "src/index.ts",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "db:init": "wrangler d1 execute memory-db --file=migrations/0001_init.sql",
+    "db:migrate:2": "wrangler d1 execute memory-db --file=migrations/0002_schema_upgrade.sql",
+    "db:migrate:3": "wrangler d1 execute memory-db --file=migrations/0003_add_summary.sql",
     "db:init:local": "wrangler d1 execute memory-db --local --file=migrations/0001_init.sql",
-    "eval": "node scripts/eval-embedding.mjs"
+    "eval": "node scripts/eval-embedding.mjs",
+    "test:check": "node scripts/test-structure.mjs"
   },
   "keywords": [
     "mcp",
@@ -20,12 +23,15 @@
     "ai-agents",
     "claude",
     "chatgpt",
-    "gemini"
+    "gemini",
+    "oauth",
+    "memory-governance"
   ],
   "author": "beach55607-max",
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
+    "@cloudflare/workers-oauth-provider": "^0.4.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "agents": "^0.9.0",
     "zod": "^4.3.6"

@@ -1,5 +1,5 @@
 /**
- * memory.delete — Delete a memory entry
+ * memory.delete — Delete a memory entry by ID
  */
 
 import { deleteEntry, getEntry } from '../services/d1.js';
@@ -17,26 +17,39 @@ export async function handleDelete(env: Env, input: Record<string, any>): Promis
 
   const id = input.id as string;
 
-  // Validate ID format (SHA-256 hex)
   if (!/^[0-9a-f]{64}$/.test(id)) {
     return { result: { error: 'VALIDATION_ERROR', message: 'id must be a 64-character hex string' }, isError: true };
   }
 
-  // Check exists
   const entry = await getEntry(env.DB, id);
   if (!entry) {
-    return { result: { error: 'NOT_FOUND', message: `Entry ${id} not found` }, isError: true };
+    return { result: { error: 'NOT_FOUND', message: 'Entry not found' }, isError: true };
   }
 
-  // D1 delete
   await deleteEntry(env.DB, id);
 
-  // Vectorize delete (best effort)
+  // Clean up reverse references (entries that point to this one via superseded_by)
   try {
-    await deleteVector(env.VECTORIZE, id);
-  } catch {
-    // Orphan vector won't affect search (D1 entry gone, join skips it)
+    await env.DB.prepare(
+      'UPDATE memory_entries SET superseded_by = NULL WHERE superseded_by = ?'
+    ).bind(id).run();
+  } catch (err: any) {
+    console.log(JSON.stringify({ event: 'reverse_ref_cleanup_failed', id, error: err.message }));
   }
 
-  return { result: { status: 'deleted' } };
+  // Vectorize delete with retry
+  let vectorDeleted = false;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      await deleteVector(env.VECTORIZE, id);
+      vectorDeleted = true;
+      break;
+    } catch (err: any) {
+      console.log(JSON.stringify({
+        event: 'vector_delete_failed', id, attempt, error: err.message,
+      }));
+    }
+  }
+
+  return { result: { status: 'deleted', vector_cleaned: vectorDeleted } };
 }

@@ -25,3 +25,13 @@ id = "<YOUR_KV_NAMESPACE_ID>"             # wrangler kv namespace create OAUTH_K
 [vars]
 MCP_ENABLED = "true"
 WRITE_ENABLED = "true"
+# API_SECRET — set via `wrangler secret put API_SECRET` (required for production REST API access)
+ALLOWED_ORIGINS = ""                      # Comma-separated origins (default: claude.ai, chatgpt.com, etc.)
+DEV_MODE = "false"                        # Set "true" for local dev (allows localhost CORS + skips API_SECRET check)
+CRON_ENABLED = "true"                     # Daily governance cron (decay, dedup, AI judge, consolidation)
+SUMMARY_ENABLED = "true"                  # AI-generated summaries on save (requires Workers AI neurons)
+SUPERSEDE_ENABLED = "true"                # Auto-supersede similar memories on save
+
+# Daily cron trigger — runs governance at UTC 03:00
+[triggers]
+crons = ["0 3 * * *"]
