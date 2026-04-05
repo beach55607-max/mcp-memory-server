@@ -92,9 +92,10 @@ ALLOWED_ORIGINS = "https://claude.ai,https://chatgpt.com"
 
 ### Claude Code（CLI）
 
-`~/.claude.json`：
+**方式 A：遠端連接（Streamable HTTP）** — 直接連你的 Worker：
 
 ```json
+// ~/.claude.json 或 .claude/settings.json
 {
   "mcpServers": {
     "memory": {
@@ -103,6 +104,44 @@ ALLOWED_ORIGINS = "https://claude.ai,https://chatgpt.com"
     }
   }
 }
+```
+
+**方式 B：stdio proxy** — 透過本地 proxy 轉發到 REST API：
+
+CLI 一行加入（注意 `-e` 和 `-s` 要在 name 之前，command 用 `--` 隔開）：
+
+```bash
+claude mcp add \
+  -e MCP_MEMORY_API=https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev \
+  -e MCP_MEMORY_API_KEY=your-secret \
+  -s user \
+  memory -- node /path/to/mcp-memory-server/src/mcp-stdio-proxy.mjs
+```
+
+或手動編輯 `~/.claude.json`：
+
+```json
+{
+  "mcpServers": {
+    "memory": {
+      "command": "node",
+      "args": ["/path/to/mcp-memory-server/src/mcp-stdio-proxy.mjs"],
+      "env": {
+        "MCP_MEMORY_API": "https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev",
+        "MCP_MEMORY_API_KEY": "your-secret"
+      }
+    }
+  }
+}
+```
+
+### Codex CLI
+
+```bash
+codex mcp add memory \
+  --env MCP_MEMORY_API=https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev \
+  --env MCP_MEMORY_API_KEY=your-secret \
+  -- node /path/to/mcp-memory-server/src/mcp-stdio-proxy.mjs
 ```
 
 ### Gemini CLI
@@ -123,6 +162,19 @@ ALLOWED_ORIGINS = "https://claude.ai,https://chatgpt.com"
 
 Settings → MCP → Transport: `streamable-http` → URL: `https://...YOUR.../mcp`
 
+或 `.cursor/mcp.json`：
+
+```json
+{
+  "mcpServers": {
+    "memory": {
+      "transport": "streamable-http",
+      "url": "https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp"
+    }
+  }
+}
+```
+
 ### VS Code + GitHub Copilot
 
 `.vscode/mcp.json`：
@@ -138,11 +190,13 @@ Settings → MCP → Transport: `streamable-http` → URL: `https://...YOUR.../m
 }
 ```
 
+需要 VS Code 1.99+ 搭配 GitHub Copilot extension。
+
 ### Windsurf / JetBrains
 
 Settings → MCP → 加入 server URL。
 
-### stdio-only 客戶端
+### 其他 stdio-only 客戶端
 
 ```bash
 MCP_MEMORY_API=https://your-worker.workers.dev \
@@ -374,12 +428,13 @@ bash setup.sh                     # auto: install → create resources → confi
 |----------|-------|--------|
 | **Claude.ai** | Web → Settings → Integrations → Add remote MCP server | Auto-syncs to iOS/Android after web setup |
 | **ChatGPT** | Web → Settings → Connectors → Advanced → Enable Developer Mode → Add MCP | Auto-syncs to mobile (Pro/Plus/Business/Enterprise/Education) |
-| **Claude Code** | `~/.claude.json` → `mcpServers` → `type: "url"` | — |
+| **Claude Code** | Remote: `type: "url"` in `~/.claude.json`. Stdio: `claude mcp add -e MCP_MEMORY_API=... -e MCP_MEMORY_API_KEY=... -s user memory -- node src/mcp-stdio-proxy.mjs` | — |
+| **Codex CLI** | `codex mcp add memory --env MCP_MEMORY_API=... --env MCP_MEMORY_API_KEY=... -- node src/mcp-stdio-proxy.mjs` | — |
 | **Gemini CLI** | `~/.gemini/settings.json` → `mcpServers` → `uri` | — |
-| **Cursor** | Settings → MCP → Transport: `streamable-http` | — |
-| **VS Code + Copilot** | `.vscode/mcp.json` → `servers` → `type: "http"` | — |
+| **Cursor** | Settings → MCP → Transport: `streamable-http`. Or `.cursor/mcp.json` | — |
+| **VS Code + Copilot** | `.vscode/mcp.json` → `servers` → `type: "http"` (VS Code 1.99+) | — |
 | **Windsurf / JetBrains** | Settings → MCP → Add URL | — |
-| **stdio-only** | `src/mcp-stdio-proxy.mjs` with `MCP_MEMORY_API` + `MCP_MEMORY_API_KEY` | — |
+| **stdio-only** | `MCP_MEMORY_API=... MCP_MEMORY_API_KEY=... node src/mcp-stdio-proxy.mjs` | — |
 
 ### Security
 
