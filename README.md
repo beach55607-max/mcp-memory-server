@@ -248,15 +248,17 @@ Cron 自動整理：90 天沒確認的歸檔、重複的去除、AI 判斷不相
 
 ## 7 個 MCP 工具詳細
 
-| 工具 | 說明 | 重要參數 |
+| 工具 | 說明 | 全部參數 |
 |------|------|---------|
-| `memory_save` | 儲存記憶 | `title`, `content`, `type`, `confidence`, `scope`, `platform` |
-| `memory_search` | 語意搜尋 | `query`, `full_content`（false=只回摘要，省 token） |
-| `memory_list` | 列出記憶 | `status`（active/legacy/all）, `cursor`（分頁） |
-| `memory_delete` | 刪除記憶 | `id` |
-| `memory_promote` | 升級為絕對真理 | `id` |
-| `memory_auto_inject` | 載入相關記憶 | `context`（描述當前任務） |
-| `memory_extract` | 從對話萃取 | `conversation`（最多 10000 字） |
+| `memory_save` | 儲存記憶（自動摘要、scope 推斷、衝突偵測、去重） | `title`\*, `content`\*, `type`\*, `tags?`, `repo?`, `source?`, `session_id?`, `scope?`, `platform?`, `confidence?` |
+| `memory_search` | 語意搜尋（摘要模式、衝突自動解決） | `query`\*, `limit?`, `type?`, `repo?`, `scope?`, `include_legacy?`, `full_content?` |
+| `memory_list` | 列出記憶（cursor 分頁） | `type?`, `repo?`, `status?`, `scope?`, `limit?`, `cursor?`, `offset?` |
+| `memory_delete` | 刪除記憶（向量清理 + 反向引用清理） | `id`\* |
+| `memory_promote` | 升級為絕對真理（僅 active 可升級） | `id`\* |
+| `memory_auto_inject` | 載入相關記憶（絕對真理強制注入） | `context`\*, `repo?`, `platform?`, `limit?` |
+| `memory_extract` | 從對話萃取記憶（含查重、高信心自動存入） | `conversation`\*, `repo?`, `platform?` |
+
+\* = 必填，? = 選填
 
 ## 架構
 
@@ -371,7 +373,7 @@ MCP_MEMORY_API_KEY=你的密碼 \
 CLOUDFLARE_ACCOUNT_ID=xxx CLOUDFLARE_API_TOKEN=xxx \
   node scripts/eval-embedding.mjs
 
-# Structural test（37 項檢查）
+# Structural test（38 項檢查）
 npm run test:check
 ```
 
@@ -417,15 +419,17 @@ ALLOWED_ORIGINS = "https://claude.ai,https://chatgpt.com"
 
 ### 7 MCP Tools
 
-| Tool | Description |
-|------|-------------|
-| `memory_save` | Save with auto-summary, scope inference, conflict detection, dedup |
-| `memory_search` | Semantic search with summary-only mode and conflict auto-resolution |
-| `memory_list` | List with filters, cursor pagination |
-| `memory_delete` | Delete with vector cleanup + reverse reference cleanup |
-| `memory_promote` | Promote to Absolute Truth (confidence=1.0), protected from cleanup. Active entries only |
-| `memory_auto_inject` | Load relevant memories at conversation start. Absolute Truths always included |
-| `memory_extract` | AI extracts memories from conversation. Auto-saves high confidence (with dedup check) |
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `memory_save` | Save with auto-summary, scope inference, conflict detection, dedup | `title`\*, `content`\*, `type`\*, `tags?`, `repo?`, `source?`, `session_id?`, `scope?`, `platform?`, `confidence?` |
+| `memory_search` | Semantic search with summary-only mode and conflict auto-resolution | `query`\*, `limit?`, `type?`, `repo?`, `scope?`, `include_legacy?`, `full_content?` |
+| `memory_list` | List with filters, cursor pagination | `type?`, `repo?`, `status?`, `scope?`, `limit?`, `cursor?`, `offset?` |
+| `memory_delete` | Delete with vector cleanup + reverse reference cleanup | `id`\* |
+| `memory_promote` | Promote to Absolute Truth (confidence=1.0). Active entries only | `id`\* |
+| `memory_auto_inject` | Load relevant memories at conversation start. Absolute Truths always included | `context`\*, `repo?`, `platform?`, `limit?` |
+| `memory_extract` | AI extracts memories from conversation. Auto-saves high confidence (with dedup) | `conversation`\*, `repo?`, `platform?` |
+
+\* = required, ? = optional
 
 ### How It Works In Practice
 

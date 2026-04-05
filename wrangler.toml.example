@@ -32,6 +32,15 @@ CRON_ENABLED = "true"                     # Daily governance cron (decay, dedup,
 SUMMARY_ENABLED = "true"                  # AI-generated summaries on save (requires Workers AI neurons)
 SUPERSEDE_ENABLED = "true"                # Auto-supersede similar memories on save
 
+# Cron tuning (optional — override defaults without redeploying)
+# DECAY_DAYS = "90"                        # Days without confirmation before archiving (1-365)
+# AI_SAMPLE_SIZE = "20"                    # Entries per cron AI judgment run (1-100)
+# ARCHIVE_CAP = "50"                       # Max entries archived per cron run (1-500)
+# RECENT_DAYS = "7"                        # Skip entries newer than this (1-90)
+# CONSOLIDATION_SIM = "0.85"              # Similarity threshold for merging (0.5-1.0)
+# MAX_CLUSTER_SIZE = "5"                   # Max entries per merge cluster (2-20)
+# MAX_CONSOLIDATION_GROUPS = "3"           # Max clusters per cron run (1-50)
+
 # Daily cron trigger — runs governance at UTC 03:00
 [triggers]
 crons = ["0 3 * * *"]
