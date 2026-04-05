@@ -87,7 +87,7 @@ ALLOWED_ORIGINS = "https://claude.ai,https://chatgpt.com"
 | **1** | **AI 主動存** | 所有平台 | AI 在對話中判斷什麼重要，主動呼叫 `memory_save`。靠 system prompt 驅動 |
 | 2 | Push hook | Claude Code | `git push` 後提示 AI 回顧並存入（PostToolUse command hook） |
 | 3 | Stop hook | Claude Code | session 結束時提示 AI 存入（command type，不保證觸發） |
-| 4 | Codex wrapper | Codex CLI | bash script 在 Codex 結束後透過 REST API 存入 |
+| 4 | Codex wrapper | Codex CLI | bash script 在 Codex 結束後透過 REST API 存入。僅限 Codex 獨立運行且無 workspace 記憶指示時需要；有 AGENTS.md 的 workspace 中 Codex 走 Layer 1 |
 
 **Supersede 保護**：`source=auto-extract` 的記憶不可取代其他來源的記憶，確保弱 AI 判斷不會覆蓋強 AI 或人類的決定。
 
@@ -481,7 +481,7 @@ The primary mechanism is **AI proactive save** (requires system prompt configura
 | **1** | **AI proactive save** | All platforms | AI decides what's important and calls `memory_save`. Driven by system prompt |
 | 2 | Push hook | Claude Code | After `git push`, prompts AI to review and save (PostToolUse command hook) |
 | 3 | Stop hook | Claude Code | On session end, prompts AI to save (command type, not guaranteed) |
-| 4 | Codex wrapper | Codex CLI | Bash script saves session summary via REST API after Codex finishes |
+| 4 | Codex wrapper | Codex CLI | Bash script saves session summary via REST API. Only needed when Codex runs standalone without workspace memory instructions; in workspaces with AGENTS.md, Codex uses Layer 1 |
 
 **Supersede protection**: memories with `source=auto-extract` cannot supersede memories from other sources. This ensures weak AI judgments don't overwrite decisions made by strong AI or humans.
 
