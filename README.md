@@ -8,7 +8,7 @@ AI coding agent（Claude Code、ChatGPT、Cursor 等）每次對話都從零開�
 
 這個 server 讓你的 AI agent 可以：
 
-- **記住** — 自動儲存對話中的重要發現、決策、偏好
+- **記住** — AI 主動判斷並儲存對話中的重要發現、決策、偏好
 - **回想** — 用自然語言搜尋，不是關鍵字比對
 - **整理** — 自動歸檔過期記憶、去重、合併相似內容
 - **保護** — 重要知識標記為「絕對真理」，永遠不被自動清理
@@ -68,18 +68,28 @@ MCP 端點：https://mcp-memory-server.你的子網域.workers.dev/mcp
 ALLOWED_ORIGINS = "https://claude.ai,https://chatgpt.com"
 ```
 
-## How Memories Are Saved
+## 記憶怎麼存入
 
-Memories are saved through a four-layer mechanism. **Layer 1 is the primary mechanism**.
+| 什麼 | 自動程度 | 原理 |
+|------|---------|------|
+| 對話開始載入記憶 | 自動 | system prompt 指示 AI 呼叫 `memory_auto_inject` |
+| 對話中存重要發現 | AI 判斷 | system prompt 定義觸發條件，AI 自己決定要不要存 |
+| 使用者說「記住」 | 使用者觸發 | AI 收到指令後呼叫 `memory_save`，confidence=1.0 |
+| 每日清理/去重/合併 | 全自動 | Cron job（UTC 03:00），不需人工 |
+| Session 結束存入 | 不保證 | 靠 hook 或 AI 主動，平台限制多 |
 
-| Layer | Mechanism | Platform | Description |
-|:-----:|-----------|----------|-------------|
-| **1** | **AI proactive save** | All platforms | AI decides what's important during conversation and calls `memory_save`. Driven by system prompt, no hooks needed |
-| 2 | Push hook | Claude Code | After `git push`, prompts AI to save findings (PostToolUse command hook) |
-| 3 | Stop hook | Claude Code | On session end, prompts AI to save (command type, not guaranteed) |
-| 4 | Codex wrapper | Codex CLI | Bash script saves session summary via REST API after Codex finishes |
+**主要機制是 AI 主動存**（需在 system prompt 設定觸發條件）。不是「裝好就自動存」— AI 需要被告知什麼時候該存。
 
-**Supersede protection**: memories with `source=auto-extract` cannot supersede memories from other sources. This ensures weak AI judgments don't overwrite decisions made by strong AI or humans.
+詳細四層架構：
+
+| 層級 | 機制 | 平台 | 說明 |
+|:----:|------|------|------|
+| **1** | **AI 主動存** | 所有平台 | AI 在對話中判斷什麼重要，主動呼叫 `memory_save`。靠 system prompt 驅動 |
+| 2 | Push hook | Claude Code | `git push` 後提示 AI 回顧並存入（PostToolUse command hook） |
+| 3 | Stop hook | Claude Code | session 結束時提示 AI 存入（command type，不保證觸發） |
+| 4 | Codex wrapper | Codex CLI | bash script 在 Codex 結束後透過 REST API 存入 |
+
+**Supersede 保護**：`source=auto-extract` 的記憶不可取代其他來源的記憶，確保弱 AI 判斷不會覆蓋強 AI 或人類的決定。
 
 ## 連接你的 AI 客戶端
 
@@ -444,14 +454,28 @@ ALLOWED_ORIGINS = "https://claude.ai,https://chatgpt.com"
 
 \* = required, ? = optional
 
-### How It Works In Practice
+### How Memories Are Saved
 
-1. **Conversation starts** → agent calls `memory_auto_inject` → loads relevant memories + Absolute Truths
-2. **During conversation** → you say "remember this" → agent calls `memory_save`
-3. **Conversation ends** → agent proactively calls `memory_save` for important findings (primary mechanism)
-4. **Daily (UTC 03:00)** → cron archives stale entries, deduplicates, AI judges relevance, consolidates similar
+| What | Automation Level | How |
+|------|-----------------|-----|
+| Load memories at conversation start | Automatic | System prompt instructs AI to call `memory_auto_inject` |
+| Save important findings during conversation | AI judgment | System prompt defines triggers; AI decides when to save |
+| User says "remember this" | User-triggered | AI calls `memory_save` with confidence=1.0 |
+| Daily cleanup / dedup / consolidation | Fully automatic | Cron job (UTC 03:00), no human intervention |
+| Save at session end | Not guaranteed | Depends on hooks or AI initiative; platform limitations apply |
 
-> **Note**: The primary mechanism is AI proactive save (Layer 1 in [How Memories Are Saved](#how-memories-are-saved)). `memory_extract` is still available for manual use but is not the recommended approach for session-end saving. On platforms without hooks, save important memories explicitly during the conversation.
+The primary mechanism is **AI proactive save** (requires system prompt configuration). It's not "install and it auto-saves" — AI needs to be told when to save.
+
+4-layer architecture:
+
+| Layer | Mechanism | Platform | Description |
+|:-----:|-----------|----------|-------------|
+| **1** | **AI proactive save** | All platforms | AI decides what's important and calls `memory_save`. Driven by system prompt |
+| 2 | Push hook | Claude Code | After `git push`, prompts AI to review and save (PostToolUse command hook) |
+| 3 | Stop hook | Claude Code | On session end, prompts AI to save (command type, not guaranteed) |
+| 4 | Codex wrapper | Codex CLI | Bash script saves session summary via REST API after Codex finishes |
+
+**Supersede protection**: memories with `source=auto-extract` cannot supersede memories from other sources. This ensures weak AI judgments don't overwrite decisions made by strong AI or humans.
 
 ### Connect Your AI Client
 
