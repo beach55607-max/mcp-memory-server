@@ -68,6 +68,19 @@ MCP 端點：https://mcp-memory-server.你的子網域.workers.dev/mcp
 ALLOWED_ORIGINS = "https://claude.ai,https://chatgpt.com"
 ```
 
+## How Memories Are Saved
+
+Memories are saved through a four-layer mechanism. **Layer 1 is the primary mechanism**.
+
+| Layer | Mechanism | Platform | Description |
+|:-----:|-----------|----------|-------------|
+| **1** | **AI proactive save** | All platforms | AI decides what's important during conversation and calls `memory_save`. Driven by system prompt, no hooks needed |
+| 2 | Push hook | Claude Code | After `git push`, prompts AI to save findings (PostToolUse command hook) |
+| 3 | Stop hook | Claude Code | On session end, prompts AI to save (command type, not guaranteed) |
+| 4 | Codex wrapper | Codex CLI | Bash script saves session summary via REST API after Codex finishes |
+
+**Supersede protection**: memories with `source=auto-extract` cannot supersede memories from other sources. This ensures weak AI judgments don't overwrite decisions made by strong AI or humans.
+
 ## 連接你的 AI 客戶端
 
 以下範例中，請把 `你的子網域` 替換成你的 Cloudflare Workers 子網域，`你的密碼` 替換成你在 setup.sh 設定的 API_SECRET。
@@ -220,8 +233,8 @@ Agent 呼叫 `memory_auto_inject` 載入相關記憶。「絕對真理」一定�
 - 你問「上次那個問題怎麼解的」→ agent 呼叫 `memory_search`
 - 你覺得某條記憶很重要永遠不能忘 → 告訴 agent「promote 這條」→ `memory_promote`
 
-**對話結束時**（自動）：
-Agent 呼叫 `memory_extract` 從對話中萃取值得記住的內容。高信心度的自動存入，低信心度的問你。
+**對話結束時**（最佳做法）：
+Agent 主動呼叫 `memory_save` 存入本次重要發現。`memory_extract` 仍可手動使用，但**主要機制是 AI 主動存**，不依賴 session 結束時的自動萃取。
 
 **背景自動**（每日 UTC 03:00）：
 Cron 自動整理：90 天沒確認的歸檔、重複的去除、AI 判斷不相關的清掉、相似的合併。
@@ -435,41 +448,10 @@ ALLOWED_ORIGINS = "https://claude.ai,https://chatgpt.com"
 
 1. **Conversation starts** → agent calls `memory_auto_inject` → loads relevant memories + Absolute Truths
 2. **During conversation** → you say "remember this" → agent calls `memory_save`
-3. **Conversation ends** → agent calls `memory_extract` → saves key findings (**see limitations below**)
+3. **Conversation ends** → agent proactively calls `memory_save` for important findings (primary mechanism)
 4. **Daily (UTC 03:00)** → cron archives stale entries, deduplicates, AI judges relevance, consolidates similar
 
-### Auto-Extract Limitations (Honest Disclosure)
-
-Step 3 above ("conversation ends → auto-extract") **only works on one platform**:
-
-| Platform | Manual save | Auto-extract on close | Why |
-|----------|:-:|:-:|-----|
-| **Claude Code** | ✅ | ✅ | Stop hook `type: "prompt"` gives the agent a turn to call tools before exiting |
-| **Claude.ai (web/mobile)** | ✅ | ❌ | No hook mechanism — closing the tab kills the session |
-| **ChatGPT** | ✅ | ❌ | Same — no hook mechanism |
-| **Claude Desktop** | ✅ | ❌ | Same |
-| **Gemini CLI** | ✅ | ❌ | No Stop hook |
-| **Cursor / Windsurf / VS Code** | ✅ | ⚠️ | Depends on IDE extension lifecycle support |
-
-**On platforms without hooks, save important memories explicitly during the conversation.** Don't rely on "the AI will auto-save when I leave" — if you close the tab, it won't.
-
-For Claude Code, add this to `~/.claude/settings.json`:
-
-```json
-{
-  "hooks": {
-    "Stop": [{
-      "hooks": [{
-        "type": "prompt",
-        "prompt": "Session ending. Call memory_extract to save important findings. Execute immediately.",
-        "statusMessage": "Extracting memories..."
-      }]
-    }]
-  }
-}
-```
-
-> **Warning**: `type: "command"` does NOT work — it runs a shell command but the agent gets no turn to act. You must use `type: "prompt"`.
+> **Note**: The primary mechanism is AI proactive save (Layer 1 in [How Memories Are Saved](#how-memories-are-saved)). `memory_extract` is still available for manual use but is not the recommended approach for session-end saving. On platforms without hooks, save important memories explicitly during the conversation.
 
 ### Connect Your AI Client
 
@@ -608,6 +590,14 @@ npm run test:check
 ### Related
 
 [ai-dev-toolkit](https://github.com/beach55607-max/ai-dev-toolkit) — AI engineering governance skills (boundary-first, spec planning, adversarial review)
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| v2.1 | 2026-04-05 | Memory save redesign: 4-layer architecture (AI proactive save as primary), supersede source protection, Stop hook changed to command type, Codex wrapper script |
+| v2.0 | 2026-04-05 | Phase 2 public release: memory governance + 13 automation features, OAuth 2.1, 6-platform support |
+| v1.0 | 2026-04-02 | Initial release: 7 MCP tools, D1 + Vectorize, basic CRUD |
 
 ## License
 
