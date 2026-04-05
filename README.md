@@ -1,6 +1,8 @@
 # MCP Memory Server
 
-讓你的 AI coding agent 擁有跨 session 的長期記憶。一次部署到 Cloudflare Workers，所有平台通用。
+Long-term memory for AI coding agents — works with **Claude Code, ChatGPT, Cursor, Gemini CLI, VS Code Copilot, Windsurf, Claude Desktop, Codex CLI**. Deploy once to Cloudflare Workers (free tier), use everywhere.
+
+讓你的 AI coding agent 擁有跨 session 的長期記憶。一次部署，所有 MCP 平台通用。
 
 ## 解決什麼問題
 
