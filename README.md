@@ -435,8 +435,41 @@ ALLOWED_ORIGINS = "https://claude.ai,https://chatgpt.com"
 
 1. **Conversation starts** → agent calls `memory_auto_inject` → loads relevant memories + Absolute Truths
 2. **During conversation** → you say "remember this" → agent calls `memory_save`
-3. **Conversation ends** → agent calls `memory_extract` → saves key findings automatically
+3. **Conversation ends** → agent calls `memory_extract` → saves key findings (**see limitations below**)
 4. **Daily (UTC 03:00)** → cron archives stale entries, deduplicates, AI judges relevance, consolidates similar
+
+### Auto-Extract Limitations (Honest Disclosure)
+
+Step 3 above ("conversation ends → auto-extract") **only works on one platform**:
+
+| Platform | Manual save | Auto-extract on close | Why |
+|----------|:-:|:-:|-----|
+| **Claude Code** | ✅ | ✅ | Stop hook `type: "prompt"` gives the agent a turn to call tools before exiting |
+| **Claude.ai (web/mobile)** | ✅ | ❌ | No hook mechanism — closing the tab kills the session |
+| **ChatGPT** | ✅ | ❌ | Same — no hook mechanism |
+| **Claude Desktop** | ✅ | ❌ | Same |
+| **Gemini CLI** | ✅ | ❌ | No Stop hook |
+| **Cursor / Windsurf / VS Code** | ✅ | ⚠️ | Depends on IDE extension lifecycle support |
+
+**On platforms without hooks, save important memories explicitly during the conversation.** Don't rely on "the AI will auto-save when I leave" — if you close the tab, it won't.
+
+For Claude Code, add this to `~/.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "Stop": [{
+      "hooks": [{
+        "type": "prompt",
+        "prompt": "Session ending. Call memory_extract to save important findings. Execute immediately.",
+        "statusMessage": "Extracting memories..."
+      }]
+    }]
+  }
+}
+```
+
+> **Warning**: `type: "command"` does NOT work — it runs a shell command but the agent gets no turn to act. You must use `type: "prompt"`.
 
 ### Connect Your AI Client
 
