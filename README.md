@@ -54,8 +54,8 @@ bash setup.sh
 部署完成後你會看到：
 
 ```
-Your server is live at: https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev
-MCP endpoint: https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp
+你的 server 已上線：https://mcp-memory-server.你的子網域.workers.dev
+MCP 端點：https://mcp-memory-server.你的子網域.workers.dev/mcp
 ```
 
 ### 部署後必做
@@ -70,13 +70,15 @@ ALLOWED_ORIGINS = "https://claude.ai,https://chatgpt.com"
 
 ## 連接你的 AI 客戶端
 
+以下範例中，請把 `你的子網域` 替換成你的 Cloudflare Workers 子網域，`你的密碼` 替換成你在 setup.sh 設定的 API_SECRET。
+
 ### Claude.ai（Web + 手機）
 
 > **重要：** 先在**網頁版**設定 → 手機自動可用。
 
 1. [claude.ai](https://claude.ai) → **Settings** → **Integrations**
 2. 新增 **remote MCP server**
-3. 貼上 `https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp`
+3. 貼上 `https://mcp-memory-server.你的子網域.workers.dev/mcp`
 4. 打開手機 Claude — memory tools 已可使用
 
 ### ChatGPT（Web + 手機）
@@ -85,7 +87,7 @@ ALLOWED_ORIGINS = "https://claude.ai,https://chatgpt.com"
 
 1. [chatgpt.com](https://chatgpt.com) → **Settings** → **Connectors** → **Advanced**
 2. 開啟 **Developer Mode**
-3. **Connectors** → 新增 MCP server → 貼上 URL
+3. **Connectors** → 新增 MCP server → 貼上 `https://mcp-memory-server.你的子網域.workers.dev/mcp`
 4. 打開手機 ChatGPT — memory tools 已可使用
 
 需要 Pro / Plus / Business / Enterprise / Education 方案。
@@ -100,7 +102,7 @@ ALLOWED_ORIGINS = "https://claude.ai,https://chatgpt.com"
   "mcpServers": {
     "memory": {
       "type": "url",
-      "url": "https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp"
+      "url": "https://mcp-memory-server.你的子網域.workers.dev/mcp"
     }
   }
 }
@@ -112,8 +114,8 @@ CLI 一行加入（注意 `-e` 和 `-s` 要在 name 之前，command 用 `--` �
 
 ```bash
 claude mcp add \
-  -e MCP_MEMORY_API=https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev \
-  -e MCP_MEMORY_API_KEY=your-secret \
+  -e MCP_MEMORY_API=https://mcp-memory-server.你的子網域.workers.dev \
+  -e MCP_MEMORY_API_KEY=你的密碼 \
   -s user \
   memory -- node /path/to/mcp-memory-server/src/mcp-stdio-proxy.mjs
 ```
@@ -127,8 +129,8 @@ claude mcp add \
       "command": "node",
       "args": ["/path/to/mcp-memory-server/src/mcp-stdio-proxy.mjs"],
       "env": {
-        "MCP_MEMORY_API": "https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev",
-        "MCP_MEMORY_API_KEY": "your-secret"
+        "MCP_MEMORY_API": "https://mcp-memory-server.你的子網域.workers.dev",
+        "MCP_MEMORY_API_KEY": "你的密碼"
       }
     }
   }
@@ -139,8 +141,8 @@ claude mcp add \
 
 ```bash
 codex mcp add memory \
-  --env MCP_MEMORY_API=https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev \
-  --env MCP_MEMORY_API_KEY=your-secret \
+  --env MCP_MEMORY_API=https://mcp-memory-server.你的子網域.workers.dev \
+  --env MCP_MEMORY_API_KEY=你的密碼 \
   -- node /path/to/mcp-memory-server/src/mcp-stdio-proxy.mjs
 ```
 
@@ -152,7 +154,7 @@ codex mcp add memory \
 {
   "mcpServers": {
     "memory": {
-      "uri": "https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp"
+      "uri": "https://mcp-memory-server.你的子網域.workers.dev/mcp"
     }
   }
 }
@@ -160,7 +162,7 @@ codex mcp add memory \
 
 ### Cursor
 
-Settings → MCP → Transport: `streamable-http` → URL: `https://...YOUR.../mcp`
+Settings → MCP → Transport: `streamable-http` → URL: `https://mcp-memory-server.你的子網域.workers.dev/mcp`
 
 或 `.cursor/mcp.json`：
 
@@ -169,7 +171,7 @@ Settings → MCP → Transport: `streamable-http` → URL: `https://...YOUR.../m
   "mcpServers": {
     "memory": {
       "transport": "streamable-http",
-      "url": "https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp"
+      "url": "https://mcp-memory-server.你的子網域.workers.dev/mcp"
     }
   }
 }
@@ -184,7 +186,7 @@ Settings → MCP → Transport: `streamable-http` → URL: `https://...YOUR.../m
   "servers": {
     "memory": {
       "type": "http",
-      "url": "https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp"
+      "url": "https://mcp-memory-server.你的子網域.workers.dev/mcp"
     }
   }
 }
@@ -194,13 +196,13 @@ Settings → MCP → Transport: `streamable-http` → URL: `https://...YOUR.../m
 
 ### Windsurf / JetBrains
 
-Settings → MCP → 加入 server URL。
+Settings → MCP → 加入 `https://mcp-memory-server.你的子網域.workers.dev/mcp`。
 
 ### 其他 stdio-only 客戶端
 
 ```bash
-MCP_MEMORY_API=https://your-worker.workers.dev \
-MCP_MEMORY_API_KEY=your-secret \
+MCP_MEMORY_API=https://mcp-memory-server.你的子網域.workers.dev \
+MCP_MEMORY_API_KEY=你的密碼 \
   node src/mcp-stdio-proxy.mjs
 ```
 
@@ -361,8 +363,8 @@ AI 功能超額時 graceful 降級 — 跳過摘要/判斷，不影響核心 CRU
 
 ```bash
 # 批次匯入知識庫
-MCP_MEMORY_API=https://your-worker.workers.dev \
-MCP_MEMORY_API_KEY=your-secret \
+MCP_MEMORY_API=https://mcp-memory-server.你的子網域.workers.dev \
+MCP_MEMORY_API_KEY=你的密碼 \
   node scripts/batch-import.mjs
 
 # Embedding 品質驗證
@@ -381,8 +383,6 @@ npm run test:check
 
 ## English Summary
 
-> Architecture diagrams, code blocks, and config examples are language-neutral — refer to the Chinese section above.
-
 ### What Is This
 
 A semantic memory server for AI coding agents. Deploy once to **Cloudflare Workers** (free tier), use from any MCP-compatible client. Your AI remembers across sessions, platforms, and projects.
@@ -393,7 +393,13 @@ A semantic memory server for AI coding agents. Deploy once to **Cloudflare Worke
 
 ### Why Cloudflare
 
-Free (D1 + Vectorize + Workers AI included), global edge deployment, serverless (no Docker/VPS), built-in AI models (no external API keys needed for embedding + text generation).
+| Feature | Details |
+|---------|---------|
+| **Free** | Workers Free plan includes D1, Vectorize, Workers AI — personal use costs nothing |
+| **Global** | Edge deployment, fast from anywhere |
+| **Serverless** | No Docker, no VPS, no server management |
+| **Secure** | OAuth 2.1 + API key + CORS allowlist |
+| **AI built-in** | Workers AI for embedding + text generation — no external API keys needed |
 
 ### Deploy (3 steps)
 
@@ -401,6 +407,12 @@ Free (D1 + Vectorize + Workers AI included), global edge deployment, serverless 
 wrangler login                    # one-time Cloudflare auth
 git clone https://github.com/beach55607-max/mcp-memory-server.git && cd mcp-memory-server
 bash setup.sh                     # auto: install → create resources → config → migrate → deploy
+```
+
+After deploy, set `ALLOWED_ORIGINS` to specify which websites can access your server:
+
+```
+ALLOWED_ORIGINS = "https://claude.ai,https://chatgpt.com"
 ```
 
 ### 7 MCP Tools
@@ -411,9 +423,9 @@ bash setup.sh                     # auto: install → create resources → confi
 | `memory_search` | Semantic search with summary-only mode and conflict auto-resolution |
 | `memory_list` | List with filters, cursor pagination |
 | `memory_delete` | Delete with vector cleanup + reverse reference cleanup |
-| `memory_promote` | Promote to Absolute Truth (confidence=1.0), protected from cleanup |
+| `memory_promote` | Promote to Absolute Truth (confidence=1.0), protected from cleanup. Active entries only |
 | `memory_auto_inject` | Load relevant memories at conversation start. Absolute Truths always included |
-| `memory_extract` | AI extracts memories from conversation. Auto-saves high confidence (with dedup) |
+| `memory_extract` | AI extracts memories from conversation. Auto-saves high confidence (with dedup check) |
 
 ### How It Works In Practice
 
@@ -424,25 +436,137 @@ bash setup.sh                     # auto: install → create resources → confi
 
 ### Connect Your AI Client
 
-| Platform | Setup | Mobile |
-|----------|-------|--------|
-| **Claude.ai** | Web → Settings → Integrations → Add remote MCP server | Auto-syncs to iOS/Android after web setup |
-| **ChatGPT** | Web → Settings → Connectors → Advanced → Enable Developer Mode → Add MCP | Auto-syncs to mobile (Pro/Plus/Business/Enterprise/Education) |
-| **Claude Code** | Remote: `type: "url"` in `~/.claude.json`. Stdio: `claude mcp add -e MCP_MEMORY_API=... -e MCP_MEMORY_API_KEY=... -s user memory -- node src/mcp-stdio-proxy.mjs` | — |
-| **Codex CLI** | `codex mcp add memory --env MCP_MEMORY_API=... --env MCP_MEMORY_API_KEY=... -- node src/mcp-stdio-proxy.mjs` | — |
-| **Gemini CLI** | `~/.gemini/settings.json` → `mcpServers` → `uri` | — |
-| **Cursor** | Settings → MCP → Transport: `streamable-http`. Or `.cursor/mcp.json` | — |
-| **VS Code + Copilot** | `.vscode/mcp.json` → `servers` → `type: "http"` (VS Code 1.99+) | — |
-| **Windsurf / JetBrains** | Settings → MCP → Add URL | — |
-| **stdio-only** | `MCP_MEMORY_API=... MCP_MEMORY_API_KEY=... node src/mcp-stdio-proxy.mjs` | — |
+In the examples below, replace `YOUR_SUBDOMAIN` with your Cloudflare Workers subdomain, and `your-secret` with the API_SECRET you set during setup.
+
+#### Claude.ai (Web + Mobile)
+
+> **Important:** Set up on the **web version** first. Once configured, it automatically works on the iOS / Android app.
+
+1. Go to [claude.ai](https://claude.ai) → **Settings** → **Integrations**
+2. Add a new **remote MCP server**
+3. Enter: `https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp`
+4. Open Claude on your phone — memory tools are now available
+
+#### ChatGPT (Web + Mobile)
+
+> **Important:** Enable **Developer Mode** on the **web version** first. Once configured, it works on the mobile app.
+
+1. Go to [chatgpt.com](https://chatgpt.com) → **Settings** → **Connectors** → **Advanced**
+2. Toggle on **Developer Mode**
+3. Go to **Connectors** → Add MCP server → Enter: `https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp`
+4. Open ChatGPT on your phone — memory tools are now available
+
+Requires Pro, Plus, Business, Enterprise, or Education plan.
+
+#### Claude Code (CLI)
+
+**Option A: Remote (Streamable HTTP)** — connect directly to your Worker:
+
+```json
+// ~/.claude.json or .claude/settings.json
+{
+  "mcpServers": {
+    "memory": {
+      "type": "url",
+      "url": "https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp"
+    }
+  }
+}
+```
+
+**Option B: stdio proxy** — local proxy forwarding to REST API:
+
+```bash
+claude mcp add \
+  -e MCP_MEMORY_API=https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev \
+  -e MCP_MEMORY_API_KEY=your-secret \
+  -s user \
+  memory -- node /path/to/mcp-memory-server/src/mcp-stdio-proxy.mjs
+```
+
+Note: `-e` and `-s` must come before the name, command is after `--`.
+
+#### Codex CLI
+
+```bash
+codex mcp add memory \
+  --env MCP_MEMORY_API=https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev \
+  --env MCP_MEMORY_API_KEY=your-secret \
+  -- node /path/to/mcp-memory-server/src/mcp-stdio-proxy.mjs
+```
+
+#### Gemini CLI
+
+`~/.gemini/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "memory": {
+      "uri": "https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp"
+    }
+  }
+}
+```
+
+#### Cursor
+
+Settings → MCP → Transport: `streamable-http` → URL: `https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp`
+
+#### VS Code + GitHub Copilot
+
+`.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "memory": {
+      "type": "http",
+      "url": "https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp"
+    }
+  }
+}
+```
+
+Requires VS Code 1.99+ with GitHub Copilot extension.
+
+#### Windsurf / JetBrains
+
+Settings → MCP → Add `https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev/mcp`.
+
+#### Other stdio-only clients
+
+```bash
+MCP_MEMORY_API=https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev \
+MCP_MEMORY_API_KEY=your-secret \
+  node src/mcp-stdio-proxy.mjs
+```
 
 ### Security
 
-- OAuth 2.1 on MCP endpoint (PKCE S256, scope whitelist)
-- API_SECRET required for REST API in production
-- CORS origin allowlist (no wildcard). Configure `ALLOWED_ORIGINS`
-- Input sanitization (script/iframe/object/embed/event handlers/javascript: URI)
+- **OAuth 2.1** on MCP endpoint (PKCE S256, scope whitelist: `memory:read`, `memory:write`)
+- **API_SECRET** required for REST API in production (`wrangler secret put API_SECRET`)
+- **CORS** origin allowlist (no wildcard `*`). Configure `ALLOWED_ORIGINS`
+- **Input sanitization**: strips script/iframe/object/embed/event handlers/javascript: URI
+- **DEV_MODE**: never enable in production (bypasses API_SECRET, allows localhost CORS)
+- **Rate limiting**: configure [Cloudflare Rate Limiting Rules](https://developers.cloudflare.com/waf/rate-limiting-rules/) after deployment
 - See [SECURITY.md](SECURITY.md)
+
+### Scripts
+
+```bash
+# Batch import knowledge files
+MCP_MEMORY_API=https://mcp-memory-server.YOUR_SUBDOMAIN.workers.dev \
+MCP_MEMORY_API_KEY=your-secret \
+  node scripts/batch-import.mjs
+
+# Embedding quality evaluation
+CLOUDFLARE_ACCOUNT_ID=xxx CLOUDFLARE_API_TOKEN=xxx \
+  node scripts/eval-embedding.mjs
+
+# Structural test (38 checks)
+npm run test:check
+```
 
 ### Related
 
