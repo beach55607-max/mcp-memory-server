@@ -400,6 +400,14 @@ CLOUDFLARE_ACCOUNT_ID=xxx CLOUDFLARE_API_TOKEN=xxx \
 npm run test:check
 ```
 
+## 更新紀錄
+
+| 版本 | 日期 | 變更 |
+|------|------|------|
+| v2.1 | 2026-04-05 | 記憶存入機制重設計：四層架構（AI 主動存為主）、supersede source 保護、Stop hook 改 command type、Codex wrapper script |
+| v2.0 | 2026-04-05 | Phase 2 公開發布：記憶治理 + 自動化 13 項功能、OAuth 2.1、6 平台支援 |
+| v1.0 | 2026-04-02 | 初版：7 MCP 工具、D1 + Vectorize、基礎 CRUD |
+
 ## 相關專案
 
 - [ai-dev-toolkit](https://github.com/beach55607-max/ai-dev-toolkit) — AI 工程治理 skill（boundary-first、spec planning、adversarial review）
