@@ -402,6 +402,27 @@ CLOUDFLARE_ACCOUNT_ID=xxx CLOUDFLARE_API_TOKEN=xxx \
 npm run test:check
 ```
 
+## 已知限制
+
+### Codex CLI exec 模式下 MCP tool call 會失敗
+
+**影響版本**：codex-cli 0.117.0（2026-04-05 確認）
+
+Codex CLI 的非互動模式（`codex exec --full-auto`、`codex:codex-rescue`）對 MCP tool call 強制要求 user approval。非互動模式下無人批准 → 自動 cancel，顯示 `user cancelled MCP tool call`。
+
+**這不是 MCP Memory Server 的問題，是 Codex CLI 的已知限制。**
+
+| 使用方式 | MCP memory tools | 狀態 |
+|---------|:----------------:|:----:|
+| `codex`（互動模式） | 手動批准後正常 | OK |
+| `codex exec --full-auto` | 自動 cancel | 不可用 |
+| 從 Claude Code 呼叫 Codex | 記憶由 Claude Code 負責 | OK |
+
+**Workaround**：
+- 互動模式下手動批准 MCP 呼叫
+- 在有 workspace instructions（AGENTS.md / CLAUDE.md）的環境中，Codex 互動模式會自己判斷何時存記憶
+- `codex exec --dangerously-bypass-approvals-and-sandbox` 可繞過，但風險高，不建議日常使用
+
 ## 更新紀錄
 
 | 版本 | 日期 | 變更 |
@@ -624,6 +645,28 @@ npm run test:check
 ### Related
 
 [ai-dev-toolkit](https://github.com/beach55607-max/ai-dev-toolkit) — AI engineering governance skills (boundary-first, spec planning, adversarial review)
+
+## Known Limitations
+
+### Codex CLI exec mode: MCP tool calls fail
+
+**Affected version**: codex-cli 0.117.0 (confirmed 2026-04-05)
+
+Codex CLI's non-interactive mode (`codex exec --full-auto`, `codex:codex-rescue`) requires user approval for MCP tool calls. In non-interactive mode, no one can approve → auto-cancel with `user cancelled MCP tool call`.
+
+**This is a Codex CLI limitation, not a Memory Server issue.**
+
+| Usage | MCP memory tools | Status |
+|-------|:----------------:|:------:|
+| `codex` (interactive) | Manually approve → works | OK |
+| `codex exec --full-auto` | Auto-cancel | Broken |
+| Called from Claude Code | Claude Code handles memory | OK |
+
+**Workarounds**:
+
+- Use interactive mode and approve MCP calls manually
+- In workspaces with AGENTS.md / CLAUDE.md, Codex interactive mode will proactively save via Layer 1
+- `codex exec --dangerously-bypass-approvals-and-sandbox` bypasses all approval (use with caution)
 
 ## Version History
 
